@@ -1,4 +1,4 @@
 /data
 *.Rproj
-*/.Rpoj.user
+/.Rpoj.user
 .DS_Store
