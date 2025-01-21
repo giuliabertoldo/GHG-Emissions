@@ -1,3 +1,4 @@
 /data
 *.Rproj
 */.Rpoj.user
+.DS_Store
