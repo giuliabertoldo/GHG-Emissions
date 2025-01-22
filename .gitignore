@@ -2,3 +2,4 @@
 *.Rproj
 /.Rpoj.user
 .DS_Store
+.Rproj.user
