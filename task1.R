@@ -1,15 +1,20 @@
+# Load packages
 library(tidyverse)
 library(readxl)
 library(purrr)
 library(stringr)
-path = 'data/EDGAR_2024_GHG_booklet_2024.xlsx'
 
 # Read data
+path = 'data/EDGAR_2024_GHG_booklet_2024.xlsx'
 df_ghg_totals_by_country <- read_excel(path, sheet = 'GHG_totals_by_country')
 
 # DATA QUALITY -------------------------------------------------------------------------------
 #### Data types checks ####
 glimpse(df_ghg_totals_by_country)
+
+# Explore variables
+# `EDGAR Country Code`
+df_ghg_totals_by_country$`EDGAR Country Code`
 
 #### Title case country name ####
 df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
@@ -35,6 +40,9 @@ sum(duplicate_rows)
 df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
   mutate(across(where(is.character), factor))
 
+#### Find EU27 ####
+df_ghg_totals_by_country %>%
+  filter(str_detect('EDGAR Country Code', "EU"))
 
 ## Select EU 27  ----------------------------------------------------------------------
 
@@ -74,6 +82,7 @@ print(checkEU27, n = Inf)
 #### Pivot longer ####
 df_ghg_totals_by_country_long <- df_ghg_totals_by_country %>%
   pivot_longer(cols = `1970`: `2023`, names_to = 'YEAR', values_to = 'GHG_EMM')
+
 
 #### Prep table for visualization ####
 

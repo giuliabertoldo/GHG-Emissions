@@ -1,0 +1,69 @@
+---
+title: "Global Greenhouse Gas (GHG) Emissions Report"
+author: "Giulia Bertoldo"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction 
+The report uses greenhouse gas (GHG) emissions time series data from the Emissions Database for Global Atmospheric Research (EDGAR). The database provides data covering all countries and spanning from 1970 to 2023. The report includes three charts providing insights to the questions:
+
+1. What is the evolution of GHG growth in the euro area, in the European Union, and worldwide?
+
+2. How do countries (classified as in the World Bank income groups) compare with respect to GHG emissions per capita?
+
+3. What is the contribution of individual countries and continents to the worldwide GHG emissions?
+
+# Process
+Data have been cleaned, analyzed, and visualized using R, mainly through the tidyverse package (e.g., dplyr, ggplot). The report has been generated using RMarkdwon. The workflow included working with RStudio, git and GitHub. 
+
+# Evolution of GHG emission growth
+
+What is the evolution of GHG growth in the euro area, in the European Union, and worldwide?
+
+
+# Contries GHG emission comparison
+
+# Contribution of individual countires and continenetes to worlwide GHG emissions
+
+
+# Reference  
+
+EDGAR (Emissions Database for Global Atmospheric Research) Community GHG Database (a collaboration between the European Commission, Joint Research Centre (JRC), the International Energy Agency (IEA), and comprising IEA-EDGAR CO2, EDGAR CH4, EDGAR N2O, EDGAR F-GASES version EDGAR_2024_GHG (2024) European Commission.
+
+European Commission, Joint Research Centre, Crippa, M., Guizzardi, D., Pagani, F., Banja, M., Muntean, M., Schaaf, E., Monforti-Ferrario, F., Becker, W.E., Quadrelli, R., Risquez Martin, A., Taghavi-Moharamli, P., Köykkä, J., Grassi, G., Rossi, S., Melo, J., Oom, D., Branco, A., San-Miguel, J., Manca, G., Pisoni, E., Vignati, E. and Pekar, F., GHG emissions of all world countries, Publications Office of the European Union, Luxembourg, 2024, https://data.europa.eu/doi/10.2760/4002897, JRC138862.
+
+IEA-EDGAR CO2 (v3), a component of the EDGAR (Emissions Database for Global Atmospheric Research) Community GHG database version EDGAR_2024_GHG (2024) including or based on data from IEA (2023) Greenhouse Gas Emissions from Energy, www.iea.org/statistics, as modified by the Joint Research Centre.
+
+Source data: https://edgar.jrc.ec.europa.eu/dataset_ghg2024
+
+EDGAR_2024_GHG website: https://edgar.jrc.ec.europa.eu/dataset_ghg2024 
+
+
+
+## R Markdown
+
+Analysis from the Emissions Database for Global Atmosperic Research (EDGAR)
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
