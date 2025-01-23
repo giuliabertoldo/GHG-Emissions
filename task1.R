@@ -12,13 +12,13 @@ df_ghg_totals_by_country <- read_excel(path, sheet = 'GHG_totals_by_country')
 #### Data types checks ####
 glimpse(df_ghg_totals_by_country)
 
-# Explore variables
 # `EDGAR Country Code`
 df_ghg_totals_by_country$`EDGAR Country Code`
+df_ghg_totals_by_country$Country
 
-#### Title case country name ####
+#### Upper case country name ####
 df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
-  mutate (Country = str_to_title(Country))
+  mutate (Country = str_to_upper(Country))
 
 ####  Missing values ####
 as.data.frame(map(df_ghg_totals_by_country, ~sum(is.na(.))))
@@ -35,64 +35,70 @@ duplicate_rows <- df_ghg_totals_by_country %>%
   duplicated(.) | duplicated(df_ghg_totals_by_country, fromLast = TRUE)
 sum(duplicate_rows)
 
-#### Factors ####
+#### Factors####
 # Convert character columns to factor
 df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
   mutate(across(where(is.character), factor))
 
-#### Find EU27 ####
-df_ghg_totals_by_country %>%
-  filter(str_detect('EDGAR Country Code', "EU"))
+#### EUROZONE FLAG, EU27 FLAG, GLOBAL FLAG ####
+# eurozone
+eurozone <- c('AUSTRIA', 'BELGIUM', 'CROATIA', 'CYPRUS', 'ESTONIA', 'FINLAND',
+              'FRANCE AND MONACO', 'GERMANY', 'GREECE', 'IRELAND',
+              'ITALY, SAN MARINO AND THE HOLY SEE', 'LATVIA', 'LITHUANIA',
+              'LUXEMBOURG', 'MALTA', 'NETHERLANDS', 'PORTUGAL', 'SLOVAKIA',
+              'SLOVENIA', 'SPAIN AND ANDORRA')
 
-## Select EU 27  ----------------------------------------------------------------------
-
-EU27 <- c('Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia',
-          'Finland', 'France And Monaco', 'Germany', 'Greece', 'Hungary', 'Ireland',
-          'Italy, San Marino And The Holy See', 'Latvia', 'Lithuania', 'Luxembourg',
-          'Malta', 'Netherlands', 'Poland', 'Portugal', 'Romania','Slovakia', 'Slovenia',
-          'Spain And Andorra', 'Sweden' )
-
-df_ghg_totals_by_country_EU27 <- df_ghg_totals_by_country %>%
-  filter(Country %in% EU27) %>%
-  arrange(Country)
-
-df_ghg_totals_by_country %>%
-  filter(grepl("IT", `EDGAR Country Code`)) %>%
-  select(Country)
-
-df_ghg_totals_by_country %>%
-  filter(grepl("SP", `EDGAR Country Code`)) %>%
-  select(Country)
-
-df_ghg_totals_by_country %>%
-  filter(grepl("FR", `EDGAR Country Code`)) %>%
-  select(Country)
-
-#### Add EU27 Flag ####
+# Keep only relevant rows
 df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
-  mutate(IS_EU27 = ifelse(Country %in% EU27, 1, 0))
+  filter((Country %in% c('EU27', 'GLOBAL TOTAL')) | (Country %in% eurozone))
 
-# Check correct Flag assignment
-checkEU27 <- df_ghg_totals_by_country %>%
-  select (Country, IS_EU27) %>%
-  filter (Country %in% EU27)
-print(checkEU27, n = Inf)
+df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
+  mutate(GEO_TYPE = case_when(
+    Country == 'EU27' ~ 'EU27',
+    Country == 'GLOBAL TOTAL' ~ 'GLOBAL',
+    Country %in% eurozone ~ 'EUROZONE'
+  ))
 
+check_eurozone <- df_ghg_totals_by_country %>%
+  select(Country, GEO_TYPE)
+print(check_eurozone, n = Inf )
 
 #### Pivot longer ####
 df_ghg_totals_by_country_long <- df_ghg_totals_by_country %>%
   pivot_longer(cols = `1970`: `2023`, names_to = 'YEAR', values_to = 'GHG_EMM')
 
+glimpse(df_ghg_totals_by_country_long)
 
-#### Prep table for visualization ####
+#### Select column ####
+df_ghg_totals_by_country_long <- df_ghg_totals_by_country_long %>%
+  select(GEO_TYPE, YEAR, GHG_EMM)
 
-df_chart1 <- df_ghg_totals_by_country_long %>%
-  group_by(YEAR, IS_EU27) %>%
-  summarise(AVG_GHG = mean (GHG_EMM), .groups = 'drop')
+#### Aggregate ####
+df_ghg_totals_by_country_group <- df_ghg_totals_by_country_long %>%
+  group_by(GEO_TYPE, YEAR) %>%
+  summarize(TOT_GHG_EMM = sum(GHG_EMM), .groups = "drop")
+
 
 #### CHART 1 --------------------------------------------------
 ## Linechart with two lines
 
-ggplot(df_chart1, aes(x = YEAR, y = AVG_GHG, color = factor(IS_EU27), group = IS_EU27)) +
-  geom_line()
+ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = factor(GEO_TYPE), group = GEO_TYPE)) +
+  geom_line() +
+  labs(
+    title = 'Evolution of GHG Emissions',
+    x = 'Year',
+    y = 'GHG (Mt CO2eq/yr)',
+    color = 'Geography Type'
+  ) +
+  theme_light() +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+    legend.text = element_text(size = 8),          # Smaller text for legend items
+    legend.title = element_text(size = 10),       # Smaller text for legend title
+    legend.key.size = unit(0.3, "cm"),            # Reduce legend key size
+    legend.spacing.y = unit(0.2, "cm")           # Adjust vertical spacing between items
+) +
+  scale_x_discrete(breaks = df_ghg_totals_by_country_group$YEAR[seq(1, length(df_ghg_totals_by_country_group$YEAR), by = 2)])
+# Show labels every 2 ticks
 
+glimpse(df_ghg_totals_by_country_group)
