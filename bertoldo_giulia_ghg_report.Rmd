@@ -19,7 +19,7 @@ The report uses greenhouse gas (GHG) emissions time series data from the Emissio
 3. What is the contribution of individual countries and continents to the worldwide GHG emissions?
 
 # Process
-Data have been cleaned, analyzed, and visualized using R, mainly through the tidyverse package (e.g., dplyr, ggplot). The report has been generated using RMarkdwon. The workflow included working with RStudio, git and GitHub. 
+Data have been cleaned, analyzed, and visualized using R, mainly through the tidyverse package (e.g., dplyr, ggplot). The report has been generated using RMarkdown. The workflow included working with RStudio, git and GitHub. 
 
 # Evolution of GHG emission growth
 
