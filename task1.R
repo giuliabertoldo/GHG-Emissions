@@ -3,6 +3,7 @@ library(tidyverse)
 library(readxl)
 library(purrr)
 library(stringr)
+library(RColorBrewer)
 
 # Read data
 path = 'data/EDGAR_2024_GHG_booklet_2024.xlsx'
@@ -77,10 +78,22 @@ df_ghg_totals_by_country_long <- df_ghg_totals_by_country_long %>%
 df_ghg_totals_by_country_group <- df_ghg_totals_by_country_long %>%
   group_by(GEO_TYPE, YEAR) %>%
   summarize(TOT_GHG_EMM = sum(GHG_EMM), .groups = "drop")
+glimpse(df_ghg_totals_by_country_group)
 
+#### Geography Type as factor
+df_ghg_totals_by_country_group$GEO_TYPE <- factor(df_ghg_totals_by_country_group$GEO_TYPE,
+                                                  levels = c('GLOBAL',
+                                                             'EU27',
+                                                             'EUROZONE'),
+                                                  labels = c("Worldwide",
+                                                             "European Union",
+                                                             "Eurozone")
+)
 
 #### CHART 1 --------------------------------------------------
-## Linechart with two lines
+pl3 <- brewer.pal(11, 'PRGn')
+custom_colors <- c("#40004B", "#1B7837", "#A6DBA0")
+
 
 ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = factor(GEO_TYPE), group = GEO_TYPE)) +
   geom_line() +
@@ -88,17 +101,18 @@ ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = fa
     title = 'Evolution of GHG Emissions',
     x = 'Year',
     y = 'GHG (Mt CO2eq/yr)',
-    color = 'Geography Type'
+    color = 'Geography'
   ) +
+  scale_color_manual(values = custom_colors) +
   theme_light() +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-    legend.text = element_text(size = 8),          # Smaller text for legend items
-    legend.title = element_text(size = 10),       # Smaller text for legend title
-    legend.key.size = unit(0.3, "cm"),            # Reduce legend key size
-    legend.spacing.y = unit(0.2, "cm")           # Adjust vertical spacing between items
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10),
+    legend.key.size = unit(0.3, "cm"),
+    legend.spacing.y = unit(0.2, "cm")
 ) +
   scale_x_discrete(breaks = df_ghg_totals_by_country_group$YEAR[seq(1, length(df_ghg_totals_by_country_group$YEAR), by = 2)])
-# Show labels every 2 ticks
 
-glimpse(df_ghg_totals_by_country_group)
+
+
