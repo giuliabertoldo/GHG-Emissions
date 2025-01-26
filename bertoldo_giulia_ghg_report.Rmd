@@ -140,8 +140,8 @@ ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = fa
     y = 'GHG (Mt CO2eq/yr)',
     color = 'Geography'
   ) +
-  scale_color_manual(values = custom_colors) +  # Use your custom color palette
-  scale_fill_manual(values = custom_colors) +   # Ensure fill uses the same colors as the lines
+  scale_color_manual(values = custom_colors) +  
+  scale_fill_manual(values = custom_colors) +   
   theme_light() +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
