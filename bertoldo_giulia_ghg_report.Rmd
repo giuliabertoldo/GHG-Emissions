@@ -25,7 +25,7 @@ library(stringr)
 ## Introduction 
 The report presents an analysis of greenhouse gas (GHG) emissions data from the Emissions Database for Global Atmospheric Research (EDGAR) [1]. Data cover all countries from 1970 to 2023. 
 
-Data were analyzed and visualized using R, mainly with the tidyverse packages (e.g., dplyr, ggplot2). The report was generated using Rmarkdown, and Git and GitHub were used as version control system (\href{https://github.com/giuliabertoldo/GHG-Emissions}{\textcolor{blue}{link to GitHub repository}}) .
+Data were analyzed and visualized using R, mainly with the tidyverse packages (e.g., dplyr, ggplot2). The report was generated using Rmarkdown, and Git and GitHub were used as version control system (\href{https://github.com/giuliabertoldo/GHG-Emissions}{\textcolor{blue}{link to GitHub repository}}).
 
 ## Evolution of GHG emission growth
 
