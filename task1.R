@@ -3,7 +3,6 @@ library(tidyverse)
 library(readxl)
 library(purrr)
 library(stringr)
-library(RColorBrewer)
 
 # Read data
 path = 'data/EDGAR_2024_GHG_booklet_2024.xlsx'
@@ -91,28 +90,35 @@ df_ghg_totals_by_country_group$GEO_TYPE <- factor(df_ghg_totals_by_country_group
 )
 
 #### CHART 1 --------------------------------------------------
-pl3 <- brewer.pal(11, 'PRGn')
+
 custom_colors <- c("#40004B", "#1B7837", "#A6DBA0")
 
-
-ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = factor(GEO_TYPE), group = GEO_TYPE)) +
+ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = factor(GEO_TYPE), fill = factor(GEO_TYPE), group = GEO_TYPE)) +
   geom_line() +
+  geom_ribbon(alpha = 0.4, aes(ymin = 0, ymax = TOT_GHG_EMM))+
   labs(
     title = 'Evolution of GHG Emissions',
     x = 'Year',
     y = 'GHG (Mt CO2eq/yr)',
     color = 'Geography'
   ) +
-  scale_color_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +  # Use your custom color palette
+  scale_fill_manual(values = custom_colors) +   # Ensure fill uses the same colors as the lines
   theme_light() +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
     legend.text = element_text(size = 8),
     legend.title = element_text(size = 10),
     legend.key.size = unit(0.3, "cm"),
-    legend.spacing.y = unit(0.2, "cm")
-) +
-  scale_x_discrete(breaks = df_ghg_totals_by_country_group$YEAR[seq(1, length(df_ghg_totals_by_country_group$YEAR), by = 2)])
+    legend.spacing.y = unit(0.2, "cm"),
+    legend.position = "bottom"
+  ) +
+  guides(fill = "none")  +
+  scale_x_discrete(breaks = df_ghg_totals_by_country_group$YEAR[seq(1, length(df_ghg_totals_by_country_group$YEAR), by = 2)]) +
+  scale_y_continuous(breaks = seq(0, max(df_ghg_totals_by_country_group$TOT_GHG_EMM), by = 5000))
 
+## Not in RMarkdown
+max(df_ghg_totals_by_country_group$TOT_GHG_EMM)
+min(df_ghg_totals_by_country_group$TOT_GHG_EMM)
 
-
+glimpse(df_ghg_totals_by_country_group)

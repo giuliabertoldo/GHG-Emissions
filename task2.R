@@ -94,19 +94,17 @@ df_per_capita_by_income_long_gr$`Income group` <- factor(df_per_capita_by_income
 glimpse(df_per_capita_by_income_long_gr)
 #### CHART 2 --------------------------------------------------
 ## Choose colors
-pl3 <- brewer.pal(11, 'PRGn')
-custom_color <- c("#D9F0D3", "#A6DBA0", "#5AAE61", "#1B7837")
-
+custom_color <- c("#FEE0D2", "#FCBBA1", "#FB6A4A", "#BD0026")
 ## Stacked bar chart
 ggplot(df_per_capita_by_income_long_gr, aes(x = YEAR,
                                             y = TOT_GHG_EMM,
                                             fill = factor(`Income group`),
                                             group = `Income group`)) +
   geom_bar(stat = 'identity', position = 'stack',color = "white", linewidth = 0.5) +
-  scale_fill_manual(values = c("High income" =  "#1B7837",
-                               "Upper middle income" = "#5AAE61",
-                               "Lower middle income" = "#A6DBA0",
-                               "Low income" ="#D9F0D3")) +
+  scale_fill_manual(values = c("High income" =  "#BD0026",
+                               "Upper middle income" = "#FB6A4A",
+                               "Lower middle income" = "#FCBBA1",
+                               "Low income" ="#FEE0D2")) +
   labs(
     title = 'Country (Income Group) Contribution to GHG Emissions',
     x = 'Year',
@@ -116,11 +114,15 @@ ggplot(df_per_capita_by_income_long_gr, aes(x = YEAR,
   theme_light() +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-    legend.text = element_text(size = 8),          # Smaller text for legend items
-    legend.title = element_text(size = 10),       # Smaller text for legend title
-    legend.key.size = unit(0.3, "cm"),            # Reduce legend key size
-    legend.spacing.y = unit(0.2, "cm")           # Adjust vertical spacing between items
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10),
+    legend.key.size = unit(0.3, "cm"),
+    legend.spacing.y = unit(0.2, "cm"),
+    legend.position = "bottom"
   ) +
-  scale_x_discrete(breaks = df_per_capita_by_income_long_gr$YEAR[seq(1, length(df_per_capita_by_income_long_gr$YEAR), by = 2)])
+  scale_x_discrete(breaks = df_per_capita_by_income_long_gr$YEAR[seq(1, length(df_per_capita_by_income_long_gr$YEAR), by = 2)]) +
+  scale_y_continuous(breaks = seq(0, 2000, by = 250))
 
-
+## No Rmarkdown
+max(df_per_capita_by_income_long_gr$TOT_GHG_EMM)
+glimpse(df_per_capita_by_income_long_gr)

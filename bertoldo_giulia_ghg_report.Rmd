@@ -1,9 +1,15 @@
 ---
 title: "Global Greenhouse Gas (GHG) Emissions Report"
-author: "Giulia Bertoldo"
-date: "`r Sys.Date()`"
 output: pdf_document
+header-includes:
+  - \usepackage{titling} 
+  - \setlength{\droptitle}{-2.5cm} 
+  - \posttitle{\end{center}\vspace{-2cm}} 
 ---
+
+\begin{center}
+\normalsize{\textit{Giulia Bertoldo}}
+\end{center}
 
 ```{r setup, include=FALSE}
 # Set up and variables 
@@ -14,27 +20,24 @@ library(tidyverse)
 library(readxl)
 library(purrr)
 library(stringr)
-library(RColorBrewer)
-library(countrycode)
-library(maps)
-library(patchwork)
 ```
 
-# Introduction 
-The report uses greenhouse gas (GHG) emissions time series data from the Emissions Database for Global Atmospheric Research (EDGAR). The database provides data covering all countries and spanning from 1970 to 2023. The report includes three charts providing insights to the questions:
+## Introduction 
+The report presents an analysis of greenhouse gas (GHG) emissions data from the Emissions Database for Global Atmospheric Research (EDGAR) [1]. Data cover all countries from 1970 to 2023. 
 
-1. What is the evolution of GHG growth in the euro area, in the European Union, and worldwide?
+Data were analyzed and visualized using R, mainly with the tidyverse packages (e.g., dplyr, ggplot2). The report was generated using Rmarkdown, and Git and GitHub were used as version control system (\href{https://github.com/giuliabertoldo/GHG-Emissions}{\textcolor{blue}{link to GitHub repository}}) .
 
-2. How do countries (classified as in the World Bank income groups) compare with respect to GHG emissions per capita?
+## Evolution of GHG emission growth
 
-3. What is the contribution of individual countries and continents to the worldwide GHG emissions?
+*What is the evolution of GHG growth in the Euro area, in the European Union, and worldwide?*
 
-# Process
-Data have been cleaned, analyzed, and visualized using R, mainly through the tidyverse package (e.g., dplyr, ggplot). The report has been generated using RMarkdown. The workflow included working with RStudio, git and GitHub. 
+For this analysis, data from the Excel sheet 'GHG_totals_by_country' were used. The pre-existing GLOBAL TOTAL and EU27 rows were used, while new rows for Eurozone were computed aggregating data from the relevant countries. 
 
-# Evolution of GHG emission growth
+* From 1970 to 2023, worldwide GHG emissions increased from approximately 24000 Mt CO2eq/yr in 1970 to about 52000 Mt CO2eq/yr in 2023.
 
-What is the evolution of GHG growth in the euro area, in the European Union, and worldwide?
+* Throughout this period, the European Union consistently contributed around 5,000 Mt CO2eq/yr until 1990. After that, emissions in the European Union began to decline, with a more significant drop following 2008.
+
+* The Eurozone followed a similar declining trend to the European Union after 2008. 
 
 ```{r include=FALSE}
 # Read data
@@ -126,34 +129,43 @@ df_ghg_totals_by_country_group$GEO_TYPE <- factor(df_ghg_totals_by_country_group
 
 ```{r echo = FALSE}
 #### CHART 1 --------------------------------------------------
-pl3 <- brewer.pal(11, 'PRGn')
 custom_colors <- c("#40004B", "#1B7837", "#A6DBA0")
 
-
-ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = factor(GEO_TYPE), group = GEO_TYPE)) +
-  geom_line() +
+ggplot(df_ghg_totals_by_country_group, aes(x = YEAR, y = TOT_GHG_EMM, color = factor(GEO_TYPE), fill = factor(GEO_TYPE), group = GEO_TYPE)) +
+  geom_line() +  
+  geom_ribbon(alpha = 0.4, aes(ymin = 0, ymax = TOT_GHG_EMM))+  
   labs(
     title = 'Evolution of GHG Emissions',
     x = 'Year',
     y = 'GHG (Mt CO2eq/yr)',
     color = 'Geography'
   ) +
-  scale_color_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +  # Use your custom color palette
+  scale_fill_manual(values = custom_colors) +   # Ensure fill uses the same colors as the lines
   theme_light() +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
     legend.text = element_text(size = 8),
     legend.title = element_text(size = 10),
     legend.key.size = unit(0.3, "cm"),
-    legend.spacing.y = unit(0.2, "cm")
-) +
-  scale_x_discrete(breaks = df_ghg_totals_by_country_group$YEAR[seq(1, length(df_ghg_totals_by_country_group$YEAR), by = 2)])
+    legend.spacing.y = unit(0.2, "cm"),
+    legend.position = "bottom"
+  ) +
+  guides(fill = "none")  +
+  scale_x_discrete(breaks = df_ghg_totals_by_country_group$YEAR[seq(1, length(df_ghg_totals_by_country_group$YEAR), by = 2)]) +
+  scale_y_continuous(breaks = seq(0, max(df_ghg_totals_by_country_group$TOT_GHG_EMM), by = 5000))
 
 ```
 
-# Contries GHG emission comparison
+# Countries GHG emission comparison
 
-How do countries (classified as in the World Bank income groups) compare with respect to GHG emissions per capita?
+*How do countries (classified as in The World Bank income groups) compare with respect to GHG emissions per capita?*
+
+For this analysis, data from the Excel sheet 'GHG_per_capita_by_country' were used. The country classification by income group was sourced from \href{https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups?}{\textcolor{blue}{The World Bank Data Help Desk}}.
+
+* Between 1970 and 1980, high income countries emitted more than twice the amount of GHG per capita compared to the combined total of upper middle income, lower middle income and low income countries.  
+
+* From 1970 to 2023, high income countries displayed an overall decrease in GHG emissions per capita, while the other countries showed a stable trend. 
 
 ```{r include=FALSE}
 # Read data
@@ -251,19 +263,17 @@ glimpse(df_per_capita_by_income_long_gr)
 ```{r echo = FALSE}
 #### CHART 2 --------------------------------------------------
 ## Choose colors
-pl3 <- brewer.pal(11, 'PRGn')
-custom_color <- c("#D9F0D3", "#A6DBA0", "#5AAE61", "#1B7837")
-
+custom_color <- c("#FEE0D2", "#FCBBA1", "#FB6A4A", "#BD0026")
 ## Stacked bar chart
 ggplot(df_per_capita_by_income_long_gr, aes(x = YEAR,
                                             y = TOT_GHG_EMM,
                                             fill = factor(`Income group`),
                                             group = `Income group`)) +
   geom_bar(stat = 'identity', position = 'stack',color = "white", linewidth = 0.5) +
-  scale_fill_manual(values = c("High income" =  "#1B7837",
-                               "Upper middle income" = "#5AAE61",
-                               "Lower middle income" = "#A6DBA0",
-                               "Low income" ="#D9F0D3")) +
+  scale_fill_manual(values = c("High income" =  "#BD0026",
+                               "Upper middle income" = "#FB6A4A",
+                               "Lower middle income" = "#FCBBA1",
+                               "Low income" ="#FEE0D2")) +
   labs(
     title = 'Country (Income Group) Contribution to GHG Emissions',
     x = 'Year',
@@ -273,21 +283,39 @@ ggplot(df_per_capita_by_income_long_gr, aes(x = YEAR,
   theme_light() +
   theme(
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-    legend.text = element_text(size = 8),          # Smaller text for legend items
-    legend.title = element_text(size = 10),       # Smaller text for legend title
-    legend.key.size = unit(0.3, "cm"),            # Reduce legend key size
-    legend.spacing.y = unit(0.2, "cm")           # Adjust vertical spacing between items
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10),
+    legend.key.size = unit(0.3, "cm"),
+    legend.spacing.y = unit(0.2, "cm"),
+    legend.position = "bottom"
   ) +
-  scale_x_discrete(breaks = df_per_capita_by_income_long_gr$YEAR[seq(1, length(df_per_capita_by_income_long_gr$YEAR), by = 2)])
+  scale_x_discrete(breaks = df_per_capita_by_income_long_gr$YEAR[seq(1, length(df_per_capita_by_income_long_gr$YEAR), by = 2)]) +
+  scale_y_continuous(breaks = seq(0, 2000, by = 250))
 
 ```
 
+\newpage
 
-# Contribution of individual countires and continenetes to worlwide GHG emissions
+# Contribution of individual countries and continents to worlwide GHG emissions
+
+*What is the contribution of individual countries and continents to the worldwide GHG emissions?*
+
+For this analysis, data from the Excel sheet 'GHG_totals_by_country' were used. Emissions data were summed across years, and the percentage of total GHG emissions was calculated for each country. Countries were classified into continents using data from the *countrycode* R package. 
+
+* China (19%) and United States (17.5%) are the leading contributors to global GHG emissions, followed by Russia (6.45%) and India (5.38%).
+
+* Asia is the continent with the largest share of global GHG emissions, accounting for nearly 45%, while Oceania has the smallest contribution.
+
+* The Americas rank second, contributing just over 25% of global emissions.
 
 ```{r include= FALSE}
+# Load library 
+library(countrycode)
+library(maps)
+library(patchwork)
 # Read data
 df_ghg_totals_by_country <- read_excel(path, sheet = 'GHG_totals_by_country')
+
 
 # DATA QUALITY  (common with task 1 )-------------------------------------------------------------------------------
 #### Data types checks ####
@@ -314,11 +342,6 @@ df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
 duplicate_rows <- df_ghg_totals_by_country %>%
   duplicated(.) | duplicated(df_ghg_totals_by_country, fromLast = TRUE)
 sum(duplicate_rows)
-
-#### Factors####
-# Convert character columns to factor
-df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
-  mutate(across(where(is.character), factor))
 
 #### Exclude EU27, GLOBAL TOTAL, INTERNATIONAL AVIATION, INTERNATIONAL SHIPPING ####
 df_ghg_totals_by_country <- df_ghg_totals_by_country %>%
@@ -348,10 +371,10 @@ max(df_ghg_perc_by_country$PER_GHG_EMM)
 
 df_ghg_perc_by_country$CAT_PER_GHG_EMM <- cut(
   df_ghg_perc_by_country$PER_GHG_EMM,
-  breaks = seq(0, 20, by = 2.5),       # Define the breakpoints
-  include.lowest = TRUE,               # Include 0 in the first bin
-  right = FALSE,                       # Use left-closed intervals [a, b)
-  labels = paste0("(", seq(0, 17.5, by = 2.5), "%-", seq(2.5, 20, by = 2.5), "%)") # Custom labels
+  breaks = seq(0, 20, by = 2.5),       
+  include.lowest = TRUE,               
+  right = FALSE,                       
+  labels = paste0(seq(0, 17.5, by = 2.5), "% - ", seq(2.5, 20, by = 2.5), "%")
 )
 glimpse(df_ghg_perc_by_country)
 
@@ -400,6 +423,39 @@ world <- map_data("world")
 world <- world %>%
   mutate(region = str_to_upper(region))
 
+# Align dataset name with maps data requirements (no corrispondence found for GIBRALTAR, HONG KONG, MACAO, CONGO)
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'ANTIGUA AND BARBUDA'] <- 'ANTIGUA'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'BRITISH VIRGIN ISLANDS'] <- 'VIRGIN ISLANDS'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'CABO VERDE'] <- 'CAPE VERDE'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'CÔTE D’IVOIRE'] <- 'IVORY COAST'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'CURAÇAO'] <- 'CURACAO'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'CZECHIA'] <- 'CZECH REPUBLIC'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'ESWATINI'] <- 'SWAZILAND'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'FAROES'] <- 'FAROE ISLANDS'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'FRANCE AND MONACO'] <- 'FRANCE'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'FRANCE AND MONACO'] <- 'MONACO'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'ISRAEL AND PALESTINE, STATE OF'] <- 'ISRAEL'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'ITALY, SAN MARINO AND THE HOLY SEE'] <- 'ITALY'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'MYANMAR/BURMA'] <- 'MYANMAR'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'RÉUNION'] <- 'REUNION'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SAINT KITTS AND NEVIS'] <- 'SAINT KITTS'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SAINT VINCENT AND THE GRENADINES'] <- 'SAINT VINCENT'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SÃO TOMÉ AND PRÍNCIPE'] <- 'SAO TOME AND PRINCIPE'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SERBIA AND MONTENEGRO'] <- 'SERBIA'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SERBIA AND MONTENEGRO'] <- 'MONTENEGRO'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SPAIN AND ANDORRA'] <- 'SPAIN'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SPAIN AND ANDORRA'] <- 'ANDORRA'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SUDAN AND SOUTH SUDAN'] <- 'SUDAN'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SWITZERLAND AND LIECHTENSTEIN'] <- 'SWITZERLAND'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'SWITZERLAND AND LIECHTENSTEIN'] <- 'LIECHTENSTEIN'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'THE GAMBIA'] <- 'GAMBIA'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'TRINIDAD AND TOBAGO'] <- 'TRINIDAD'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'TRINIDAD AND TOBAGO'] <- 'TOBAGO'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'TÜRKIYE'] <- 'TURKEY'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'UNITED STATES'] <- 'USA'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'VIET NAM'] <- 'VIETNAM'
+df_ghg_perc_by_country_cont$Country[df_ghg_perc_by_country_cont$Country == 'UNITED KINGDOM'] <- 'UK'
+
 # Left join
 df_ghg_perc_by_country_world <- left_join(world,
                                           df_ghg_perc_by_country_cont,
@@ -422,81 +478,31 @@ regions <- world %>%
   select (region) %>%
   distinct() %>%
   arrange(region)
-
-# Align dataset name, no corrispondence found for GIBRALTAR, HONG KONG, MACAO, CONGO
-world$region[world$region == 'ANTIGUA'] <- 'ANTIGUA AND BARBUDA'
-world$region[world$region == 'VIRGIN ISLANDS'] <- 'BRITISH VIRGIN ISLANDS'
-world$region[world$region == 'CAPE VERDE'] <- 'CABO VERDE'
-world$region[world$region == 'IVORY COAST'] <- 'CÔTE D’IVOIRE'
-world$region[world$region == 'CURACAO'] <- 'CURAÇAO'
-world$region[world$region == 'CZECH REPUBLIC'] <- 'CZECHIA'
-world$region[world$region == 'SWAZILAND'] <- 'ESWATINI'
-world$region[world$region == 'FAROE ISLANDS'] <- 'FAROES'
-world$region[world$region == 'FRANCE'] <- 'FRANCE AND MONACO'
-world$region[world$region == 'MONACO'] <- 'FRANCE AND MONACO'
-world$region[world$region == 'ISRAEL'] <- 'ISRAEL AND PALESTINE, STATE OF'
-world$region[world$region == 'ITALY'] <- 'ITALY, SAN MARINO AND THE HOLY SEE'
-world$region[world$region == 'MYANMAR'] <- 'MYANMAR/BURMA'
-world$region[world$region == 'REUNION'] <- 'RÉUNION'
-world$region[world$region == 'SAINT HELENA'] <- 'SAINT HELENA, ASCENSION AND TRISTAN DA CUNHA'
-world$region[world$region == 'SAINT KITTS'] <- 'SAINT KITTS AND NEVIS'
-world$region[world$region == 'SAINT VINCENT'] <- 'SAINT VINCENT AND THE GRENADINES'
-world$region[world$region == 'SAO TOME AND PRINCIPE'] <- 'SÃO TOMÉ AND PRÍNCIPE'
-world$region[world$region == 'SERBIA'] <- 'SERBIA AND MONTENEGRO'
-world$region[world$region == 'MONTENEGRO'] <- 'SERBIA AND MONTENEGRO'
-world$region[world$region == 'SPAIN'] <- 'SPAIN AND ANDORRA'
-world$region[world$region == 'ANDORRA'] <- 'SPAIN AND ANDORRA'
-world$region[world$region == 'SUDAN'] <- 'SUDAN AND SOUTH SUDAN'
-world$region[world$region == 'SWITZERLAND'] <- 'SWITZERLAND AND LIECHTENSTEIN'
-world$region[world$region == 'LIECHTENSTEIN'] <- 'SWITZERLAND AND LIECHTENSTEIN'
-world$region[world$region == 'GAMBIA'] <- 'THE GAMBIA'
-world$region[world$region == 'TRINIDAD'] <- 'TRINIDAD AND TOBAGO'
-world$region[world$region == 'TOBAGO'] <- 'TRINIDAD AND TOBAGO'
-world$region[world$region == 'TURKEY'] <- 'TÜRKIYE'
-world$region[world$region == 'USA'] <- 'UNITED STATES'
-world$region[world$region == 'VIETNAM'] <- 'VIET NAM'
-world$region[world$region == 'UK'] <- 'UNITED KINGDOM'
-
-# Perform new join
-df_ghg_perc_by_country_world <- left_join(world,
-                                          df_ghg_perc_by_country_cont,
-                                          by = c('region' = 'Country' ))
-
 ```
 
 
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, warning=FALSE}
 # VISUALIZATION WORLD MAP --------------------------------------
 map_world <- ggplot() +
-  theme(legend.position="bottom") +
   geom_map(data=df_ghg_perc_by_country_world,
            map=world,
-           aes(map_id=region, x=long, y=lat, fill=CAT_PER_GHG_EMM), color = "black", size = 0.1) +
+           aes(map_id=region, x=long, y=lat, fill=CAT_PER_GHG_EMM), color = "black", linewidth = 0.1) +
   scale_fill_brewer(palette = "Reds",
                     name = "GHG Emissions Contribution")+
-  #scale_fill_gradient(low = "white", high = "darkred", name = "GHG Emissions") +
   coord_equal() +
   theme_light() +
   theme(
-    axis.title = element_blank(),  # Remove axis titles
-    axis.text = element_blank(),   # Remove axis text
-    axis.ticks = element_blank(),  # Remove axis ticks
-    legend.position = "bottom"     # Optional: Adjust legend position
+    axis.title = element_blank(),  
+    axis.text = element_blank(),   
+    axis.ticks = element_blank(),  
+    legend.position = "bottom"     
   )
 
-
 # CONTINENTS BARCHARTS -----------------------------------------------------------------------------
-continent_bar <- ggplot(data = continent, aes(x = reorder(continent, CONT_PER_GHG_EMM), y = CONT_PER_GHG_EMM, fill = continent)) +
-  geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.5)) +
-  scale_fill_manual(values = c(
-    "Asia" = "#cb1818",
-    "Americas" = "#ef3b2c",
-    "Europe" = "#fb6a4a",
-    "Africa" = "#fc9272",
-    "Oceania" = "#fcbba1"
-  )) +
+continent_bar <- ggplot(data = continent, aes(x = reorder(continent, CONT_PER_GHG_EMM), y = CONT_PER_GHG_EMM)) +
+  geom_bar(stat = "identity", width = 0.5, position = position_dodge(width = 0.5),  fill = "lightgrey", color = "darkgrey") +
   labs(
     x = 'Continent',
     y = 'Percentage Contribution to Worldwide GHG'
@@ -508,29 +514,19 @@ continent_bar <- ggplot(data = continent, aes(x = reorder(continent, CONT_PER_GH
     panel.grid.minor = element_blank(),
     axis.text.x = element_text(size = 10),
     axis.text.y = element_text(size = 12, hjust = 1)
-  )
+  ) +
+  coord_flip() + 
+  scale_y_continuous(breaks = seq(0, 50, by = 5))
 
 # COMBINE GRAPHS -----------------------------------------------------------------------------
 # Combine the map and bar chart using patchwork
-combined_plot <- map_world + continent_bar + plot_layout(ncol = 2, widths = c(2, 1))
+combined_plot <- map_world / continent_bar + plot_layout(heights = c(2, 1))
 
 # Display the combined plot
 combined_plot
 ```
 
 
-What is the contribution of individual countries and continents to the worldwide GHG emissions?
-
 # References  
 
-EDGAR (Emissions Database for Global Atmospheric Research) Community GHG Database (a collaboration between the European Commission, Joint Research Centre (JRC), the International Energy Agency (IEA), and comprising IEA-EDGAR CO2, EDGAR CH4, EDGAR N2O, EDGAR F-GASES version EDGAR_2024_GHG (2024) European Commission.
-
-European Commission, Joint Research Centre, Crippa, M., Guizzardi, D., Pagani, F., Banja, M., Muntean, M., Schaaf, E., Monforti-Ferrario, F., Becker, W.E., Quadrelli, R., Risquez Martin, A., Taghavi-Moharamli, P., Köykkä, J., Grassi, G., Rossi, S., Melo, J., Oom, D., Branco, A., San-Miguel, J., Manca, G., Pisoni, E., Vignati, E. and Pekar, F., GHG emissions of all world countries, Publications Office of the European Union, Luxembourg, 2024, https://data.europa.eu/doi/10.2760/4002897, JRC138862.
-
-IEA-EDGAR CO2 (v3), a component of the EDGAR (Emissions Database for Global Atmospheric Research) Community GHG database version EDGAR_2024_GHG (2024) including or based on data from IEA (2023) Greenhouse Gas Emissions from Energy, www.iea.org/statistics, as modified by the Joint Research Centre.
-
-Source data: https://edgar.jrc.ec.europa.eu/dataset_ghg2024
-
-EDGAR_2024_GHG website: https://edgar.jrc.ec.europa.eu/dataset_ghg2024 
-
-
+[1] EDGAR (Emissions Database for Global Atmospheric Research) Community GHG Database (a collaboration between the European Commission, Joint Research Centre (JRC), the International Energy Agency (IEA), and comprising IEA-EDGAR CO2, EDGAR CH4, EDGAR N2O, EDGAR F-GASES version EDGAR_2024_GHG (2024) European Commission
