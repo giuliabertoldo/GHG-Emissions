@@ -19,5 +19,5 @@ Repository content:
 Note: Data have not been uploaded in the repository. To reproduce, please download the following data and store them in a folder called 'data':
 
 * [EDGAR_2024_GHG_booklet_2024.xlsx](https://edgar.jrc.ec.europa.eu/report_2024?vis=ghgpop#data_download): Download the file called EDGAR GHG emissions
-* [CLASS.xlsx](https://datacatalogapi.worldbank.org/ddhxext/ResourceDownload?resource_unique_id=DR0090755)
+* [CLASS.xlsx](https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups?): Download the current classification by income in XLSX format
 
